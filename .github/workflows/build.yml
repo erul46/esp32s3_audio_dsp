@@ -3,13 +3,13 @@ name: Build ESP32-S3 Firmware
 on:
   push:
     branches: [ "main" ]
-  workflow_dispatch: # Memungkinkan Anda memicu build secara manual kapan saja
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: espressif/idf:latest # Menggunakan image resmi ESP-IDF terbaru
+      image: espressif/idf:release-v5.3 # Kunci ke versi stabil v5.3
 
     steps:
       - name: Checkout Repository
@@ -22,10 +22,16 @@ jobs:
             git clone --recursive https://github.com/espressif/esp-dsp.git components/esp-dsp
           fi
 
+      - name: Patch Dependencies and CMakeLists
+        run: |
+          # Hapus lock file versi 6.0
+          rm -f dependencies.lock
+          # Daftarkan dependensi json, http_server, nvs, wifi ke CMake
+          sed -i 's/INCLUDE_DIRS "\."/INCLUDE_DIRS "." REQUIRES json esp_http_server nvs_flash esp_wifi driver esp_pm esp_timer/g' main/CMakeLists.txt
+
       - name: Build Firmware
         run: |
           . /opt/esp/idf/export.sh
-          idf.py set-target esp32s3
           idf.py build
 
       - name: Upload Binaries Artifact
