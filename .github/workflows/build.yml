@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: espressif/idf:release-v5.3 # Kunci ke versi stabil v5.3
+      image: espressif/idf:release-v5.3
 
     steps:
       - name: Checkout Repository
@@ -24,10 +24,10 @@ jobs:
 
       - name: Patch Dependencies and CMakeLists
         run: |
-          # Hapus lock file versi 6.0
+          # Hapus lock file versi lama
           rm -f dependencies.lock
-          # Daftarkan dependensi json, http_server, nvs, wifi ke CMake
-          sed -i 's/INCLUDE_DIRS "\."/INCLUDE_DIRS "." REQUIRES json esp_http_server nvs_flash esp_wifi driver esp_pm esp_timer/g' main/CMakeLists.txt
+          # Tambahkan esp-dsp, json, dan modul lainnya ke daftar REQUIRES
+          sed -i 's/INCLUDE_DIRS "\."/INCLUDE_DIRS "." REQUIRES esp-dsp json esp_http_server nvs_flash esp_wifi driver esp_pm esp_timer esp_netif esp_event esp-tls/g' main/CMakeLists.txt
 
       - name: Build Firmware
         run: |
